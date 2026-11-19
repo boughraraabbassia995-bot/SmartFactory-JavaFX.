@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 
 public class Main extends Application {
 
@@ -32,7 +33,42 @@ public class Main extends Application {
 
         ProgressIndicator load = new ProgressIndicator(0);
 
-        power.setOnAction(e -> {
+         
+power.setOnAction(e -> {
+
+    if (power.isSelected()) {
+
+        controller.startMachine();
+        power.setText("ON");
+        status.setText("Machine Running");
+
+    } else {
+
+        Alert alert = new Alert(
+            Alert.AlertType.CONFIRMATION
+        );
+
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Stop the machine?");
+        alert.setContentText(
+            "Are you sure you want to stop Motor 1?"
+        );
+
+        if (alert.showAndWait().orElse(
+            ButtonType.CANCEL
+        ) == ButtonType.OK) {
+
+            controller.stopMachine();
+            power.setText("OFF");
+            status.setText("Machine Stopped");
+            speed.setValue(0);
+
+        } else {
+            power.setSelected(true);
+        }
+    }
+});
+ {
             if (power.isSelected()) {
                 controller.startMachine();
                 power.setText("ON");
