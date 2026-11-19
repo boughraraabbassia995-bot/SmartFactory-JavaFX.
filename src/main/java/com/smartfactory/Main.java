@@ -11,6 +11,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class Main extends Application {
 
@@ -24,6 +27,8 @@ public class Main extends Application {
         Label title = new Label("SMART FACTORY");
         Label status = new Label("Machine Stopped");
         Label speedLabel = new Label("Speed: 0 RPM");
+        Label temperatureLabel = new Label("Temperature: 25 °C");
+Label alarmLabel = new Label("Status: STOPPED");
 
         ToggleButton power = new ToggleButton("OFF");
 
@@ -32,6 +37,49 @@ public class Main extends Application {
         speed.setShowTickMarks(true);
 
         ProgressIndicator load = new ProgressIndicator(0);
+        Timeline temperatureTimer = new Timeline(
+    new KeyFrame(Duration.seconds(2), e -> {
+
+        if (machine.isRunning()) {
+
+            double newTemperature =
+                machine.getTemperature() + 2;
+
+            machine.setTemperature(newTemperature);
+
+            temperatureLabel.setText(
+                "Temperature: " +
+                machine.getTemperature() + " °C"
+            );
+
+            alarmLabel.setText(
+                "Status: " + machine.getStatus()
+            );
+
+            if (machine.getStatus().equals("FAULT")) {
+
+                power.setSelected(false);
+                power.setText("OFF");
+                speed.setValue(0);
+
+                status.setText("Machine Stopped - FAULT");
+
+                temperatureTimer.stop();
+
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Temperature Alert");
+                alert.setHeaderText("Machine Overheated!");
+                alert.setContentText(
+                    "Temperature exceeded 100 °C. Machine stopped automatically."
+                );
+                alert.showAndWait();
+            }
+        }
+    })
+);
+
+temperatureTimer.setCycleCount(Timeline.INDEFINITE);
+        
 
          
 power.setOnAction(e -> {
@@ -110,6 +158,8 @@ power.setOnAction(e -> {
             new Label("Adjust Speed"),
             speed,
             speedLabel,
+            temperatureLabel,
+alarmLabel,
             new Label("Machine Load"),
             load
         );
