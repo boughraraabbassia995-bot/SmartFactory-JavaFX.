@@ -8,6 +8,7 @@ public class Machine {
     private double speed;
     private double load;
     private double temperature;
+    private String status;
 
     public Machine(String name) {
         this.name = name;
@@ -15,6 +16,7 @@ public class Machine {
         this.speed = 0;
         this.load = 0;
         this.temperature = 25;
+        this.status = "STOPPED";
     }
 
     public String getName() {
@@ -27,6 +29,11 @@ public class Machine {
 
     public void setRunning(boolean running) {
         this.running = running;
+        if (!running) {
+            status = "STOPPED";
+        } else {
+            status = "RUNNING";
+        }
     }
 
     public double getSpeed() {
@@ -51,5 +58,21 @@ public class Machine {
 
     public void setTemperature(double temperature) {
         this.temperature = temperature;
+
+        if (temperature > 100) {
+            running = false;
+            speed = 0;
+            status = "FAULT";
+        } else if (temperature > 90) {
+            status = "WARNING";
+        } else if (running) {
+            status = "RUNNING";
+        } else {
+            status = "STOPPED";
+        }
+    }
+
+    public String getStatus() {
+        return status;
     }
 }
