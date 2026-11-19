@@ -1,29 +1,86 @@
 
 package com.smartfactory;
 
+import com.smartfactory.model.Machine;
+import com.smartfactory.controller.MachineController;
+
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
-import javafx.geometry.Pos;
 import javafx.stage.Stage;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.geometry.Insets;
 
 public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
 
+        Machine machine = new Machine("Motor 1");
+        MachineController controller =
+                new MachineController(machine);
+
         Label title = new Label("SMART FACTORY");
-        Label subtitle = new Label("Industrial IoT Dashboard");
+        Label status = new Label("Machine Stopped");
+        Label speedLabel = new Label("Speed: 0 RPM");
 
-        VBox root = new VBox(20);
-        root.getChildren().addAll(title, subtitle);
+        ToggleButton power = new ToggleButton("OFF");
 
-        root.setAlignment(Pos.CENTER);
+        Slider speed = new Slider(0, 3000, 0);
+        speed.setShowTickLabels(true);
+        speed.setShowTickMarks(true);
 
-        Scene scene = new Scene(root, 900, 600);
+        ProgressIndicator load = new ProgressIndicator(0);
 
-        stage.setTitle("Smart Factory");
+        power.setOnAction(e -> {
+            if (power.isSelected()) {
+                controller.startMachine();
+                power.setText("ON");
+                status.setText("Machine Running");
+            } else {
+                controller.stopMachine();
+                power.setText("OFF");
+                status.setText("Machine Stopped");
+                speed.setDisable(true);
+                speed.setValue(0);
+            }
+        });
+
+        speed.setDisable(true);
+
+        power.selectedProperty().addListener(
+            (obs, oldValue, newValue) -> {
+                speed.setDisable(!newValue);
+            }
+        );
+
+        speed.valueProperty().addListener(
+            (obs, oldValue, newValue) -> {
+                machine.setSpeed(newValue.doubleValue());
+                speedLabel.setText(
+                    "Speed: " + newValue.intValue() + " RPM"
+                );
+            }
+        );
+
+        VBox root = new VBox(15);
+        root.setPadding(new Insets(25));
+
+        root.getChildren().addAll(
+            title,
+            new Label("Machine: Motor 1"),
+            status,
+            power,
+            new Label("Adjust Speed"),
+            speed,
+            speedLabel,
+            new Label("Machine Load"),
+            load
+        );
+
+        Scene scene = new Scene(root, 600, 450);
+
+        stage.setTitle("Smart Factory Dashboard");
         stage.setScene(scene);
         stage.show();
     }
@@ -32,3 +89,4 @@ public class Main extends Application {
         launch(args);
     }
 }
+
