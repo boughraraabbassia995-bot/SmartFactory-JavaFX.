@@ -1,0 +1,42 @@
+
+.root {
+    -fx-background-color: #17212f;
+    -fx-padding: 25px;
+    -fx-font-family: "Arial";
+}
+
+.label {
+    -fx-text-fill: #f1f5f9;
+    -fx-font-size: 14px;
+}
+
+.button {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 16px;
+}
+
+.toggle-button {
+    -fx-background-color: #475569;
+    -fx-text-fill: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 16px;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #16a34a;
+}
+
+.slider .track {
+    -fx-background-color: #64748b;
+}
+
+.slider .thumb {
+    -fx-background-color: #38bdf8;
+}
+
+.progress-indicator {
+    -fx-progress-color: #22c55e;
+}
