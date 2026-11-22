@@ -29,9 +29,10 @@ public class Machine {
 
     public void setRunning(boolean running) {
         this.running = running;
-        if (!running) {
+
+        if (!running && !status.equals("FAULT")) {
             status = "STOPPED";
-        } else {
+        } else if (running) {
             status = "RUNNING";
         }
     }
@@ -63,10 +64,13 @@ public class Machine {
             running = false;
             speed = 0;
             status = "FAULT";
+
         } else if (temperature > 90) {
             status = "WARNING";
+
         } else if (running) {
             status = "RUNNING";
+
         } else {
             status = "STOPPED";
         }
