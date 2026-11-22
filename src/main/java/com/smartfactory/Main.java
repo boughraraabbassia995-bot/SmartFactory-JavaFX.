@@ -10,7 +10,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -27,121 +26,75 @@ public class Main extends Application {
         Label title = new Label("SMART FACTORY");
         Label status = new Label("Machine Stopped");
         Label speedLabel = new Label("Speed: 0 RPM");
-        Label temperatureLabel = new Label("Temperature: 25 °C");
-Label alarmLabel = new Label("Status: STOPPED");
+        Label temperatureLabel =
+                new Label("Temperature: 25 °C");
+        Label alarmLabel = new Label("Status: STOPPED");
+
         Button acknowledgeButton =
-    new Button("Acknowledge Alarm");
-        acknowledgeButton.setOnAction(e -> {
-
-    alarmLabel.setText(
-        "Alarm Acknowledged - " + machine.getStatus()
-    );
-
-});
+                new Button("Acknowledge Alarm");
 
         ToggleButton power = new ToggleButton("OFF");
 
         Slider speed = new Slider(0, 3000, 0);
         speed.setShowTickLabels(true);
         speed.setShowTickMarks(true);
+        speed.setDisable(true);
 
         ProgressIndicator load = new ProgressIndicator(0);
+
         Timeline temperatureTimer = new Timeline(
-    new KeyFrame(Duration.seconds(2), e -> {
+            new KeyFrame(Duration.seconds(2), e -> {
 
-        if (machine.isRunning()) {
+                if (machine.isRunning()) {
 
-            double newTemperature =
-                machine.getTemperature() + 2;
+                    double newTemperature =
+                            machine.getTemperature() + 2;
 
-            machine.setTemperature(newTemperature);
+                    machine.setTemperature(newTemperature);
 
-            temperatureLabel.setText(
-                "Temperature: " +
-                machine.getTemperature() + " °C"
-            );
+                    temperatureLabel.setText(
+                        "Temperature: " +
+                        machine.getTemperature() + " °C"
+                    );
 
-            alarmLabel.setText(
-                "Status: " + machine.getStatus()
-            );
+                    alarmLabel.setText(
+                        "Status: " + machine.getStatus()
+                    );
 
-            if (machine.getStatus().equals("FAULT")) {
+                    if (machine.getStatus().equals("WARNING")) {
+                        status.setText("Temperature Warning!");
+                    }
 
-                power.setSelected(false);
-                power.setText("OFF");
-                speed.setValue(0);
+                    if (machine.getStatus().equals("FAULT")) {
 
-                status.setText("Machine Stopped - FAULT");
+                        power.setSelected(false);
+                        power.setText("OFF");
+                        speed.setValue(0);
 
-                temperatureTimer.stop();
+                        status.setText("Machine Stopped - FAULT");
 
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Temperature Alert");
-                alert.setHeaderText("Machine Overheated!");
-                alert.setContentText(
-                    "Temperature exceeded 100 °C. Machine stopped automatically."
-                );
-                alert.showAndWait();
-            }
-        }
-    })
-);
+                        temperatureTimer.stop();
 
-temperatureTimer.setCycleCount(Timeline.INDEFINITE);
-        
+                        Alert alert = new Alert(
+                            Alert.AlertType.WARNING
+                        );
 
-         
-power.setOnAction(e -> {
+                        alert.setTitle("Temperature Alert");
+                        alert.setHeaderText("Machine Overheated!");
+                        alert.setContentText(
+                            "Temperature exceeded 100 °C. " +
+                            "Machine stopped automatically."
+                        );
 
-    if (power.isSelected()) {
-
-        controller.startMachine();
-        power.setText("ON");
-        status.setText("Machine Running");
-        temperatureTimer.play();
-        temperatureTimer.stop();
-
-    } else {
-
-        Alert alert = new Alert(
-            Alert.AlertType.CONFIRMATION
+                        alert.showAndWait();
+                    }
+                }
+            })
         );
 
-        alert.setTitle("Confirmation");
-        alert.setHeaderText("Stop the machine?");
-        alert.setContentText(
-            "Are you sure you want to stop Motor 1?"
+        temperatureTimer.setCycleCount(
+            Timeline.INDEFINITE
         );
-
-        if (alert.showAndWait().orElse(
-            ButtonType.CANCEL
-        ) == ButtonType.OK) {
-
-            controller.stopMachine();
-            power.setText("OFF");
-            status.setText("Machine Stopped");
-            speed.setValue(0);
-
-        } else {
-            power.setSelected(true);
-        }
-    }
-});
- {
-            if (power.isSelected()) {
-                controller.startMachine();
-                power.setText("ON");
-                status.setText("Machine Running");
-            } else {
-                controller.stopMachine();
-                power.setText("OFF");
-                status.setText("Machine Stopped");
-                speed.setDisable(true);
-                speed.setValue(0);
-            }
-        });
-
-        speed.setDisable(true);
 
         power.selectedProperty().addListener(
             (obs, oldValue, newValue) -> {
@@ -149,14 +102,67 @@ power.setOnAction(e -> {
             }
         );
 
+        power.setOnAction(e -> {
+
+            if (power.isSelected()) {
+
+                controller.startMachine();
+
+                power.setText("ON");
+                status.setText("Machine Running");
+                alarmLabel.setText("Status: RUNNING");
+
+                temperatureTimer.playFromStart();
+
+            } else {
+
+                Alert alert = new Alert(
+                    Alert.AlertType.CONFIRMATION
+                );
+
+                alert.setTitle("Confirmation");
+                alert.setHeaderText("Stop the machine?");
+                alert.setContentText(
+                    "Are you sure you want to stop Motor 1?"
+                );
+
+                if (alert.showAndWait().orElse(
+                    ButtonType.CANCEL
+                ) == ButtonType.OK) {
+
+                    controller.stopMachine();
+                    temperatureTimer.stop();
+
+                    power.setText("OFF");
+                    status.setText("Machine Stopped");
+                    alarmLabel.setText("Status: STOPPED");
+
+                    speed.setValue(0);
+
+                } else {
+                    power.setSelected(true);
+                }
+            }
+        });
+
         speed.valueProperty().addListener(
             (obs, oldValue, newValue) -> {
+
                 machine.setSpeed(newValue.doubleValue());
+
                 speedLabel.setText(
                     "Speed: " + newValue.intValue() + " RPM"
                 );
             }
         );
+
+        acknowledgeButton.setOnAction(e -> {
+
+            alarmLabel.setText(
+                "Alarm Acknowledged - " +
+                machine.getStatus()
+            );
+        });
 
         VBox root = new VBox(15);
         root.setPadding(new Insets(25));
@@ -170,13 +176,13 @@ power.setOnAction(e -> {
             speed,
             speedLabel,
             temperatureLabel,
-alarmLabel,
+            alarmLabel,
             acknowledgeButton,
             new Label("Machine Load"),
             load
         );
 
-        Scene scene = new Scene(root, 600, 450);
+        Scene scene = new Scene(root, 600, 500);
 
         stage.setTitle("Smart Factory Dashboard");
         stage.setScene(scene);
@@ -187,4 +193,3 @@ alarmLabel,
         launch(args);
     }
 }
-
