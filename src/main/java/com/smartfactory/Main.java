@@ -65,8 +65,6 @@ public class Main extends Application {
         ProgressIndicator load =
                 new ProgressIndicator(0);
 
-        // Simulation of temperature and load
-
         Timeline simulation = new Timeline(
             new KeyFrame(Duration.seconds(2), e -> {
 
@@ -86,7 +84,6 @@ public class Main extends Application {
                             Math.min(motor.getLoad() + 0.05, 1.0);
 
                     motor.setLoad(newLoad);
-
                     load.setProgress(newLoad);
 
                     loadLabel.setText(
@@ -110,7 +107,6 @@ public class Main extends Application {
                         motorPower.setText("Motor OFF");
 
                         motorStatus.setText("Motor: FAULT");
-
                         speed.setValue(0);
 
                         simulation.stop();
@@ -134,8 +130,6 @@ public class Main extends Application {
 
         simulation.setCycleCount(Timeline.INDEFINITE);
 
-        // Speed control
-
         motorPower.selectedProperty().addListener(
             (obs, oldValue, newValue) -> {
                 speed.setDisable(!newValue);
@@ -152,8 +146,6 @@ public class Main extends Application {
                 );
             }
         );
-
-        // Motor control
 
         motorPower.setOnAction(e -> {
 
@@ -201,8 +193,6 @@ public class Main extends Application {
             }
         });
 
-        // Pump control
-
         pumpPower.setOnAction(e -> {
 
             if (pumpPower.isSelected()) {
@@ -215,8 +205,6 @@ public class Main extends Application {
                 pumpStatus.setText("Pump: STOPPED");
             }
         });
-
-        // Conveyor control
 
         conveyorPower.setOnAction(e -> {
 
@@ -231,17 +219,11 @@ public class Main extends Application {
             }
         });
 
-        // Acknowledge alarm
-
         acknowledgeButton.setOnAction(e -> {
-
             alarmLabel.setText(
-                "Alarm Acknowledged - " +
-                motor.getStatus()
+                "Alarm Acknowledged - " + motor.getStatus()
             );
         });
-
-        // Dashboard layout
 
         VBox root = new VBox(15);
         root.setPadding(new Insets(25));
@@ -277,6 +259,11 @@ public class Main extends Application {
         );
 
         Scene scene = new Scene(root, 650, 800);
+
+        // Connect CSS file
+        scene.getStylesheets().add(
+            getClass().getResource("/style.css").toExternalForm()
+        );
 
         stage.setTitle("Smart Factory Dashboard");
         stage.setScene(scene);
