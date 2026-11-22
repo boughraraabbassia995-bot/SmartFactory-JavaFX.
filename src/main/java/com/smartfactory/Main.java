@@ -19,7 +19,6 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
 
-        // Machines
         Machine motor = new Machine("Motor 1");
         Machine pump = new Machine("Pump");
         Machine conveyor = new Machine("Conveyor");
@@ -33,22 +32,18 @@ public class Main extends Application {
         MachineController conveyorController =
                 new MachineController(conveyor);
 
-        // Title
         Label title = new Label("SMART FACTORY");
         Label overview = new Label("FACTORY OVERVIEW");
 
-        // Machine status labels
         Label motorStatus = new Label("Motor: STOPPED");
         Label pumpStatus = new Label("Pump: STOPPED");
         Label conveyorStatus = new Label("Conveyor: STOPPED");
 
-        // Machine buttons
         ToggleButton motorPower = new ToggleButton("Motor OFF");
         ToggleButton pumpPower = new ToggleButton("Pump OFF");
         ToggleButton conveyorPower =
                 new ToggleButton("Conveyor OFF");
 
-        // Motor controls
         Label speedLabel = new Label("Speed: 0 RPM");
 
         Slider speed = new Slider(0, 3000, 0);
@@ -56,12 +51,13 @@ public class Main extends Application {
         speed.setShowTickMarks(true);
         speed.setDisable(true);
 
-        // Temperature
         Label temperatureLabel =
                 new Label("Temperature: 25 °C");
 
         Label alarmLabel =
                 new Label("Status: STOPPED");
+
+        Label loadLabel = new Label("Machine Load: 0%");
 
         Button acknowledgeButton =
                 new Button("Acknowledge Alarm");
@@ -69,8 +65,9 @@ public class Main extends Application {
         ProgressIndicator load =
                 new ProgressIndicator(0);
 
-        // Temperature simulation
-        Timeline temperatureTimer = new Timeline(
+        // Simulation of temperature and load
+
+        Timeline simulation = new Timeline(
             new KeyFrame(Duration.seconds(2), e -> {
 
                 if (motor.isRunning()) {
@@ -83,6 +80,18 @@ public class Main extends Application {
                     temperatureLabel.setText(
                         "Temperature: " +
                         motor.getTemperature() + " °C"
+                    );
+
+                    double newLoad =
+                            Math.min(motor.getLoad() + 0.05, 1.0);
+
+                    motor.setLoad(newLoad);
+
+                    load.setProgress(newLoad);
+
+                    loadLabel.setText(
+                        "Machine Load: " +
+                        (int)(newLoad * 100) + "%"
                     );
 
                     alarmLabel.setText(
@@ -101,9 +110,10 @@ public class Main extends Application {
                         motorPower.setText("Motor OFF");
 
                         motorStatus.setText("Motor: FAULT");
+
                         speed.setValue(0);
 
-                        temperatureTimer.stop();
+                        simulation.stop();
 
                         Alert alert = new Alert(
                             Alert.AlertType.WARNING
@@ -122,11 +132,10 @@ public class Main extends Application {
             })
         );
 
-        temperatureTimer.setCycleCount(
-            Timeline.INDEFINITE
-        );
+        simulation.setCycleCount(Timeline.INDEFINITE);
 
-        // Motor speed control
+        // Speed control
+
         motorPower.selectedProperty().addListener(
             (obs, oldValue, newValue) -> {
                 speed.setDisable(!newValue);
@@ -144,7 +153,8 @@ public class Main extends Application {
             }
         );
 
-        // Motor ON/OFF
+        // Motor control
+
         motorPower.setOnAction(e -> {
 
             if (motorPower.isSelected()) {
@@ -155,7 +165,7 @@ public class Main extends Application {
                 motorStatus.setText("Motor: RUNNING");
                 alarmLabel.setText("Status: RUNNING");
 
-                temperatureTimer.playFromStart();
+                simulation.playFromStart();
 
             } else {
 
@@ -174,13 +184,16 @@ public class Main extends Application {
                 ) == ButtonType.OK) {
 
                     motorController.stopMachine();
-                    temperatureTimer.stop();
+                    simulation.stop();
 
                     motorPower.setText("Motor OFF");
                     motorStatus.setText("Motor: STOPPED");
                     alarmLabel.setText("Status: STOPPED");
 
                     speed.setValue(0);
+                    motor.setLoad(0);
+                    load.setProgress(0);
+                    loadLabel.setText("Machine Load: 0%");
 
                 } else {
                     motorPower.setSelected(true);
@@ -188,34 +201,30 @@ public class Main extends Application {
             }
         });
 
-        // Pump ON/OFF
+        // Pump control
+
         pumpPower.setOnAction(e -> {
 
             if (pumpPower.isSelected()) {
-
                 pumpController.startMachine();
                 pumpPower.setText("Pump ON");
                 pumpStatus.setText("Pump: RUNNING");
-
             } else {
-
                 pumpController.stopMachine();
                 pumpPower.setText("Pump OFF");
                 pumpStatus.setText("Pump: STOPPED");
             }
         });
 
-        // Conveyor ON/OFF
+        // Conveyor control
+
         conveyorPower.setOnAction(e -> {
 
             if (conveyorPower.isSelected()) {
-
                 conveyorController.startMachine();
                 conveyorPower.setText("Conveyor ON");
                 conveyorStatus.setText("Conveyor: RUNNING");
-
             } else {
-
                 conveyorController.stopMachine();
                 conveyorPower.setText("Conveyor OFF");
                 conveyorStatus.setText("Conveyor: STOPPED");
@@ -223,6 +232,7 @@ public class Main extends Application {
         });
 
         // Acknowledge alarm
+
         acknowledgeButton.setOnAction(e -> {
 
             alarmLabel.setText(
@@ -231,9 +241,9 @@ public class Main extends Application {
             );
         });
 
-        // Layout
-        VBox root = new VBox(15);
+        // Dashboard layout
 
+        VBox root = new VBox(15);
         root.setPadding(new Insets(25));
 
         root.getChildren().addAll(
@@ -262,10 +272,11 @@ public class Main extends Application {
             acknowledgeButton,
 
             new Label("MACHINE LOAD"),
+            loadLabel,
             load
         );
 
-        Scene scene = new Scene(root, 650, 750);
+        Scene scene = new Scene(root, 650, 800);
 
         stage.setTitle("Smart Factory Dashboard");
         stage.setScene(scene);
@@ -276,4 +287,3 @@ public class Main extends Application {
         launch(args);
     }
 }
-
