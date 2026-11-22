@@ -29,6 +29,15 @@ public class Main extends Application {
         Label speedLabel = new Label("Speed: 0 RPM");
         Label temperatureLabel = new Label("Temperature: 25 °C");
 Label alarmLabel = new Label("Status: STOPPED");
+        Button acknowledgeButton =
+    new Button("Acknowledge Alarm");
+        acknowledgeButton.setOnAction(e -> {
+
+    alarmLabel.setText(
+        "Alarm Acknowledged - " + machine.getStatus()
+    );
+
+});
 
         ToggleButton power = new ToggleButton("OFF");
 
@@ -89,6 +98,8 @@ power.setOnAction(e -> {
         controller.startMachine();
         power.setText("ON");
         status.setText("Machine Running");
+        temperatureTimer.play();
+        temperatureTimer.stop();
 
     } else {
 
@@ -160,6 +171,7 @@ power.setOnAction(e -> {
             speedLabel,
             temperatureLabel,
 alarmLabel,
+            acknowledgeButton,
             new Label("Machine Load"),
             load
         );
