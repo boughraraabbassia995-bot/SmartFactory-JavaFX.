@@ -65,8 +65,10 @@ public class Main extends Application {
         ProgressIndicator load =
                 new ProgressIndicator(0);
 
-        Timeline simulation = new Timeline(
-            new KeyFrame(Duration.seconds(2), e -> {
+        Timeline simulation = new Timeline();
+
+simulation.getKeyFrames().add(
+    new KeyFrame(Duration.seconds(2), e -> {
 
                 if (motor.isRunning()) {
 
